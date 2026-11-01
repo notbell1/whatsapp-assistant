@@ -120,39 +120,11 @@ export function applySettingsDirectly(settings: PrivacyEngineSettings): void {
   processPrivacy(); // Synchronous immediate DOM scan for 100% real-time response
 }
 
-export async function updatePrivacySettings(
-  settings: PrivacyEngineSettings,
-): Promise<void> {
-  applySettingsDirectly(settings);
-}
-
 export function getPrivacySettings(): PrivacyEngineSettings | null {
   if (!privacySettings) {
     return null;
   }
   return { ...privacySettings };
-}
-
-export function stopPrivacyEngine(): void {
-  if (observer) {
-    observer.disconnect();
-    observer = null;
-  }
-
-  if (scanFrame !== null) {
-    window.cancelAnimationFrame(scanFrame);
-    scanFrame = null;
-  }
-
-  cleanupAllBlur();
-  resetRootStyles();
-
-  privacySettings = null;
-  engineStarted = false;
-}
-
-export function scanPrivacyTargets(): void {
-  scheduleScan();
 }
 
 export function updateBlurIntensity(intensity: number): void {
@@ -195,19 +167,6 @@ function syncRootStyles(): void {
   } else {
     document.documentElement.removeAttribute("data-whatsapp-safe-screen-share");
   }
-}
-
-function resetRootStyles(): void {
-  document.documentElement.style.removeProperty("--whatsapp-blur");
-  document.documentElement.removeAttribute("data-whatsapp-safe-screen-share");
-  document.documentElement.removeAttribute("data-wa-active");
-  document.documentElement.removeAttribute("data-wa-messages");
-  document.documentElement.removeAttribute("data-wa-contacts");
-  document.documentElement.removeAttribute("data-wa-avatars");
-  document.documentElement.removeAttribute("data-wa-media");
-  document.documentElement.removeAttribute("data-wa-files");
-  document.documentElement.removeAttribute("data-wa-previews");
-  document.documentElement.removeAttribute("data-wa-typing");
 }
 
 /* =========================================================

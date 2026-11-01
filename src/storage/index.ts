@@ -5,7 +5,6 @@ export const LEGACY_STORAGE_KEY = "whatsappPrivacySettings";
 
 export const DEFAULT_SETTINGS: WhatsAppAssistantSettings = {
   enabled: true,
-
   messages: false,
   contactNames: false,
   profilePictures: false,
@@ -14,11 +13,8 @@ export const DEFAULT_SETTINGS: WhatsAppAssistantSettings = {
   chatPreview: false,
   composeBox: false,
   safeScreenShare: false,
-
   blurIntensity: 6,
 };
-
-export const DEFAULT_PRIVACY_SETTINGS = DEFAULT_SETTINGS;
 
 function isExtensionValid(): boolean {
   try {
@@ -35,7 +31,6 @@ export async function loadPrivacySettings(): Promise<WhatsAppAssistantSettings> 
 
   try {
     const result = await chrome.storage.local.get([STORAGE_KEY, LEGACY_STORAGE_KEY]);
-
     const stored = (result[STORAGE_KEY] ?? result[LEGACY_STORAGE_KEY]) as
       | Partial<WhatsAppAssistantSettings>
       | undefined;
@@ -61,20 +56,6 @@ export async function savePrivacySettings(
       [STORAGE_KEY]: settings,
     });
   } catch {
-    // Ignore error if extension context was invalidated during reload
-  }
-}
-
-export async function resetPrivacySettings(): Promise<void> {
-  if (!isExtensionValid()) {
-    return;
-  }
-
-  try {
-    await chrome.storage.local.set({
-      [STORAGE_KEY]: DEFAULT_SETTINGS,
-    });
-  } catch {
-    // Ignore error
+    // Ignore error if extension context was invalidated
   }
 }

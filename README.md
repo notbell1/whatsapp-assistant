@@ -45,33 +45,22 @@
 <a id="preview"></a>
 ## 📸 Preview Tampilan
 
-Perlindungan privasi visual menyeluruh yang aktif seketika pada antarmuka WhatsApp Web:
+Antarmuka modern, intuitif, dan responsif dari WhatsApp Assistant di WhatsApp Web:
 
-### 🌟 Tampilan Percakapan Terlindungi (Privacy Blur in Action)
-<p align="center">
-  <img src="screenshots/preview.png" alt="WhatsApp Assistant Full Preview" width="100%" style="border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
-</p>
-
-<br />
-
-### 🎛️ Panel Kontrol & Menu Informasi Interaktif
-
-<table align="center" width="100%">
-  <tr>
-    <th width="50%" align="center">⚙️ Floating Privacy Controls</th>
-    <th width="50%" align="center">ℹ️ About & Interactive WhatsApp Bug Reporter</th>
-  </tr>
-  <tr>
-    <td align="center" valign="top">
-      <img src="screenshots/setting.png" alt="WhatsApp Assistant Settings Drawer" width="100%" style="border-radius: 8px;" />
-      <p align="center"><sub><em>Live Simulator, Quick Presets (Enhanced, Screen-Share, Chat Only, Reset), 2-Column Grid, dan Precision Slider.</em></sub></p>
-    </td>
-    <td align="center" valign="top">
-      <img src="screenshots/about.png" alt="WhatsApp Assistant About View" width="100%" style="border-radius: 8px;" />
-      <p align="center"><sub><em>Zero-knowledge architecture, tautan resmi developer berikon warna, dan pelaporan bug otomatis via WhatsApp.</em></sub></p>
-    </td>
-  </tr>
-</table>
+<div align="center">
+  <table border="0" width="100%">
+    <tr>
+      <td align="center" width="50%" valign="top">
+        <strong>⚙️ Panel Kontrol Privasi (Dashboard)</strong><br><br>
+        <img src="screenshots/setting.png" alt="WhatsApp Assistant Privacy Controls" width="380" />
+      </td>
+      <td align="center" width="50%" valign="top">
+        <strong>ℹ️ Informasi & Dukungan (About)</strong><br><br>
+        <img src="screenshots/about.png" alt="WhatsApp Assistant About View" width="380" />
+      </td>
+    </tr>
+  </table>
+</div>
 
 ---
 

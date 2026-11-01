@@ -4,7 +4,7 @@ import {
   applySettingsDirectly,
   type PrivacyEngineSettings,
 } from "../privacy/engine";
-import { savePrivacySettings, loadPrivacySettings } from "../../storage";
+import { loadPrivacySettings } from "../../storage";
 import { setWhatsAppButtonActive } from "./whatsapp-button";
 
 type PrivacySettingId =

@@ -1,5 +1,4 @@
 export const WHATSAPP_BLUR_CLASS = "whatsapp-privacy-blur";
-
 export const WHATSAPP_BLUR_ATTRIBUTE = "data-whatsapp-blurred";
 
 const BLUR_MIN = 0;
@@ -12,7 +11,7 @@ export function clampIntensity(intensity: number): number {
   return Math.max(BLUR_MIN, Math.min(BLUR_MAX, intensity));
 }
 
-export function applyBlur(element: HTMLElement, _intensity?: number): void {
+export function applyBlur(element: HTMLElement): void {
   if (element.closest('[data-whatsapp="view"]')) {
     return;
   }
@@ -31,15 +30,4 @@ export function applyBlur(element: HTMLElement, _intensity?: number): void {
 export function removeBlur(element: HTMLElement): void {
   element.classList.remove(WHATSAPP_BLUR_CLASS);
   element.removeAttribute(WHATSAPP_BLUR_ATTRIBUTE);
-}
-
-export function updateBlurIntensity(
-  _element: HTMLElement,
-  _intensity: number,
-): void {
-  // Intensity is handled globally via document root CSS variable to eliminate memory overhead
-}
-
-export function isBlurred(element: HTMLElement): boolean {
-  return element.classList.contains(WHATSAPP_BLUR_CLASS);
 }

@@ -1,12 +1,10 @@
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("WhatsApp Assistant v2.0.0 installed.");
+  console.log("WhatsApp Assistant v2.1.0 installed.");
 });
 
-// Listen for keyboard command (Ctrl+Shift+U / Cmd+Shift+U)
 chrome.commands.onCommand.addListener(async (command) => {
   if (command === "toggle-privacy") {
     try {
-      // Query active tab in current window (does not require 'tabs' permission in MV3)
       const tabs = await chrome.tabs.query({
         active: true,
         currentWindow: true,
@@ -19,7 +17,7 @@ chrome.commands.onCommand.addListener(async (command) => {
               type: "WA_ASSISTANT_TOGGLE_PRIVACY",
             });
           } catch {
-            // Tab might not be a WhatsApp tab or content script not ready
+            // Ignore if content script is not yet active
           }
         }
       }
