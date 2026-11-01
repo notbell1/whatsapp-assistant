@@ -1,4 +1,4 @@
-export interface NttbellPrivacySettings {
+export interface WhatsAppAssistantSettings {
   enabled: boolean;
 
   messages: boolean;
@@ -7,6 +7,8 @@ export interface NttbellPrivacySettings {
   media: boolean;
   files: boolean;
   chatPreview: boolean;
+  composeBox: boolean;
+  safeScreenShare: boolean;
 
   blurIntensity: number;
 }

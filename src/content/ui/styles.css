@@ -1,43 +1,49 @@
-﻿/* ==========================================
+/* ==========================================
    VARIABEL TEMA (LIGHT & DARK MODE)
+   WhatsApp Assistant v2.0.0
 ========================================== */
 :root {
-  --nttbell-bg: #ffffff;
-  --nttbell-surface: #f4f5f7;
-  --nttbell-surface-hover: #ebeef0;
-  --nttbell-text: #111b21;
-  --nttbell-muted: #667781;
-  --nttbell-border: rgba(11, 20, 26, 0.08);
-  --nttbell-border-light: rgba(11, 20, 26, 0.04);
-  --nttbell-icon-bg: #e9edef;
-  --nttbell-switch-off: #cbd5e1;
-  --nttbell-scrollbar: rgba(11, 20, 26, 0.12);
+  --whatsapp-bg: #ffffff;
+  --whatsapp-surface: #f4f5f7;
+  --whatsapp-surface-hover: #ebeef0;
+  --whatsapp-text: #111b21;
+  --whatsapp-muted: #667781;
+  --whatsapp-border: rgba(11, 20, 26, 0.1);
+  --whatsapp-border-light: rgba(11, 20, 26, 0.05);
+  --whatsapp-icon-bg: #e9edef;
+  --whatsapp-switch-off: #cbd5e1;
+  --whatsapp-scrollbar: rgba(11, 20, 26, 0.15);
 
-  /* Gradien Premium Sunset (Merah - Oranye) */
-  --nttbell-accent-grad: linear-gradient(135deg, #ff7a00 0%, #ff004d 100%);
-  --nttbell-accent-solid: #ff004d;
-  --nttbell-accent-glow: rgba(255, 0, 77, 0.2);
+  /* High-Contrast Neon Shield Theme (Neon Mint -> WhatsApp Emerald -> Cyber Cyan) */
+  --whatsapp-accent-grad: linear-gradient(135deg, #00ffa3 0%, #25d366 50%, #00d2ff 100%);
+  --whatsapp-accent-solid: #00c968;
+  --whatsapp-accent-glow: rgba(0, 255, 163, 0.35);
+
+  --whatsapp-blur: 6px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --nttbell-bg: #111b21;
-    --nttbell-surface: #202c33;
-    --nttbell-surface-hover: #2a3942;
-    --nttbell-text: #e9edef;
-    --nttbell-muted: #8696a0;
-    --nttbell-border: rgba(255, 255, 255, 0.08);
-    --nttbell-border-light: rgba(255, 255, 255, 0.03);
-    --nttbell-icon-bg: #374045;
-    --nttbell-switch-off: #475569;
-    --nttbell-scrollbar: rgba(255, 255, 255, 0.15);
+    --whatsapp-bg: #111b21;
+    --whatsapp-surface: #202c33;
+    --whatsapp-surface-hover: #2a3942;
+    --whatsapp-text: #e9edef;
+    --whatsapp-muted: #8696a0;
+    --whatsapp-border: rgba(255, 255, 255, 0.1);
+    --whatsapp-border-light: rgba(255, 255, 255, 0.05);
+    --whatsapp-icon-bg: #374045;
+    --whatsapp-switch-off: #475569;
+    --whatsapp-scrollbar: rgba(255, 255, 255, 0.2);
+
+    --whatsapp-accent-solid: #00ffa3;
+    --whatsapp-accent-glow: rgba(0, 255, 163, 0.45);
   }
 }
 
 /* ==========================================
    TRIGGER BUTTON LAYOUT (SIDEBAR WA)
 ========================================== */
-[data-nttbell="wrapper"] {
+[data-whatsapp="wrapper"] {
   width: 100%;
   display: flex;
   align-items: center;
@@ -45,7 +51,7 @@
   margin-top: 4px;
 }
 
-button[data-nttbell="navbar-item"] {
+button[data-whatsapp="navbar-item"] {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -56,25 +62,63 @@ button[data-nttbell="navbar-item"] {
   border: 0;
   border-radius: 50%;
   background: transparent;
-  color: var(--nttbell-muted);
+  color: var(--whatsapp-muted);
   cursor: pointer;
   outline: none;
-  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-button[data-nttbell="navbar-item"]:hover {
-  background: var(--nttbell-icon-bg);
+button[data-whatsapp="navbar-item"]:hover {
+  background-color: rgba(134, 150, 160, 0.16) !important;
 }
 
-button[data-nttbell="navbar-item"]:active {
+@media (prefers-color-scheme: dark) {
+  button[data-whatsapp="navbar-item"]:hover {
+    background-color: #2a3942 !important;
+  }
+}
+
+button[data-whatsapp="navbar-item"]:active {
   transform: scale(0.92);
 }
 
-button[data-nttbell="navbar-item"][aria-pressed="true"] {
-  background: rgba(255, 65, 108, 0.12);
+button[data-whatsapp="navbar-item"][aria-pressed="true"] {
+  background: rgba(0, 255, 163, 0.18) !important;
 }
 
-[data-nttbell="icon"] {
+/* ==========================================
+   WHATSAPP NATIVE-STYLE NAVBAR TOOLTIP
+   (Matches Gambar 1)
+========================================== */
+.whatsapp-navbar-tooltip {
+  position: fixed;
+  z-index: 1000000;
+  pointer-events: none;
+  background: #ffffff;
+  color: #111b21;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.2;
+  padding: 5px 12px;
+  border-radius: 7px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28), 0 1px 2px rgba(0, 0, 0, 0.16);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(-50%) translateX(-4px);
+  transition: opacity 0.15s cubic-bezier(0.2, 0, 0, 1), transform 0.15s cubic-bezier(0.2, 0, 0, 1);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.whatsapp-navbar-tooltip.show {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+
+
+[data-whatsapp="icon"] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -83,469 +127,1273 @@ button[data-nttbell="navbar-item"][aria-pressed="true"] {
     filter 0.25s ease;
 }
 
-[data-nttbell="icon"] svg {
+[data-whatsapp="icon"] svg {
   display: block;
   width: 22px;
   height: 22px;
 }
 
-button[data-nttbell="navbar-item"][aria-pressed="true"] [data-nttbell="icon"] {
+button[data-whatsapp="navbar-item"][aria-pressed="true"] [data-whatsapp="icon"] {
   transform: scale(1.15);
-  filter: drop-shadow(0 2px 6px rgba(255, 0, 77, 0.25));
+  filter: drop-shadow(0 2px 6px rgba(255, 0, 77, 0.3));
 }
 
 /* ==========================================
-   BASE & HEADER PANEL PENGATURAN
+   MODERN GLASSMORPHIC FLOATING DRAWER (DASHBOARD)
 ========================================== */
-[data-nttbell="view"] {
-  position: absolute;
-  inset: 0;
-  z-index: 9999;
+[data-whatsapp="view"] {
+  position: fixed;
+  top: 14px;
+  right: 18px;
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 28px);
+  z-index: 999999;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  background: var(--nttbell-bg);
-  color: var(--nttbell-text);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 18px 45px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(0, 0, 0, 0.08);
+  color: var(--whatsapp-text);
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-  animation: nttbellFadeIn 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: whatsappDrawerIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
 }
 
-@keyframes nttbellFadeIn {
+@media (prefers-color-scheme: dark) {
+  [data-whatsapp="view"] {
+    background: rgba(17, 27, 33, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+      0 18px 50px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+}
+
+@keyframes whatsappDrawerIn {
   from {
     opacity: 0;
-    transform: scale(0.98);
+    transform: translateY(-8px) scale(0.97);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0) scale(1);
   }
 }
 
-[data-nttbell="view-header"] {
+/* Header */
+[data-whatsapp="view-header"] {
   flex: 0 0 auto;
-  height: 54px;
+  height: 52px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
   padding: 0 16px;
-  border-bottom: 1px solid var(--nttbell-border);
-  background: color-mix(in srgb, var(--nttbell-bg) 85%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  z-index: 10;
+  border-bottom: 1px solid var(--whatsapp-border);
+  background: color-mix(in srgb, var(--whatsapp-bg) 70%, transparent);
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
 }
 
-[data-nttbell="back-button"] {
-  width: 32px;
-  height: 32px;
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-header-action {
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  user-select: none;
+}
+
+/* High contrast About button (eye-catching pill) */
+.btn-header-about {
+  padding: 0 10px;
+  gap: 5px;
+  background: rgba(0, 255, 163, 0.12);
+  border: 1px solid rgba(0, 255, 163, 0.42);
+  color: #00ffa3;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 0 10px rgba(0, 255, 163, 0.12);
+}
+
+.btn-header-about:hover {
+  background: rgba(0, 255, 163, 0.22);
+  border-color: #00ffa3;
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(0, 255, 163, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-header-about:active {
+  transform: translateY(0) scale(0.96);
+}
+
+.btn-header-about[aria-pressed="true"] {
+  background: var(--whatsapp-accent-grad);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(37, 211, 102, 0.4);
+}
+
+/* High contrast Close button */
+.btn-header-close {
+  width: 28px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #e9edef;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.btn-header-close:hover {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-header-close:active {
+  transform: translateY(0) scale(0.96);
+}
+
+.header-logo-icon {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-whatsapp="view-title"] {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.title-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge-version {
+  font-size: 9px;
+  font-weight: 750;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--whatsapp-accent-grad);
+  color: #fff;
+  letter-spacing: 0.04em;
+}
+
+[data-whatsapp="back-button"] {
+  width: 28px;
+  height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: var(--nttbell-muted);
+  color: var(--whatsapp-muted);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-[data-nttbell="back-button"]:hover {
-  background: var(--nttbell-surface);
-  color: var(--nttbell-text);
+[data-whatsapp="back-button"]:hover {
+  background: var(--whatsapp-surface);
+  color: var(--whatsapp-text);
 }
 
-[data-nttbell="back-button"]:active {
-  transform: scale(0.92);
-}
-
-[data-nttbell="view-title"] {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 650;
-  line-height: 1.2;
-}
-
-[data-nttbell="view-subtitle"] {
-  font-size: 10px;
-  color: var(--nttbell-muted);
-}
-
-/* ==========================================
-   MAIN CONTENT (COMPACT MODE)
-========================================== */
-[data-nttbell="view-content"] {
+/* Main Content Area */
+[data-whatsapp="view-content"] {
   flex: 1 1 auto;
   overflow-y: auto;
-  padding: 16px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--nttbell-scrollbar) transparent;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--whatsapp-scrollbar) transparent;
 }
 
-[data-nttbell="view-content"]::-webkit-scrollbar {
-  width: 5px;
+[data-whatsapp="view-content"]::-webkit-scrollbar {
+  width: 4px;
 }
-[data-nttbell="view-content"]::-webkit-scrollbar-track {
-  background: transparent;
-}
-[data-nttbell="view-content"]::-webkit-scrollbar-thumb {
+[data-whatsapp="view-content"]::-webkit-scrollbar-thumb {
   border-radius: 10px;
-  background: var(--nttbell-scrollbar);
+  background: var(--whatsapp-scrollbar);
 }
 
 /* ==========================================
-   CARD GROUPS (Wadah Hemat Ruang)
+   LIVE SHIELD SIMULATOR (INTERACTIVE CANVAS)
 ========================================== */
-[data-nttbell="card-group"] {
-  background: var(--nttbell-surface);
-  border: 1px solid var(--nttbell-border);
-  border-radius: 14px;
-  padding: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
-  transition:
-    opacity 0.3s ease,
-    filter 0.3s ease;
+.simulator-card {
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--whatsapp-surface) 95%, transparent);
+  border: 1px solid var(--whatsapp-border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-/* ==========================================
-   MASTER CARD (Desain Mewah Gradien)
-========================================== */
-[data-nttbell="master-card"] {
+.simulator-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--whatsapp-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-[data-nttbell="master-info"] {
+.simulator-pulse {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--whatsapp-accent-solid);
+}
+
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--whatsapp-accent-solid);
+  box-shadow: 0 0 6px var(--whatsapp-accent-solid);
+  animation: pulseAnim 1.8s infinite;
+}
+
+@keyframes pulseAnim {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+.simulator-body {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  padding: 6px 8px;
+  background: var(--whatsapp-bg);
+  border-radius: 8px;
+  border: 1px solid var(--whatsapp-border-light);
 }
 
-[data-nttbell="master-icon"] {
-  width: 36px;
-  height: 36px;
+.sim-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
-  background: var(--nttbell-icon-bg);
-  color: var(--nttbell-muted);
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-[data-nttbell="master-card"][data-enabled="true"] [data-nttbell="master-icon"] {
-  background: var(--nttbell-accent-grad);
   color: #fff;
-  box-shadow: 0 3px 10px var(--nttbell-accent-glow);
+  font-size: 11px;
+  font-weight: 700;
+  flex: 0 0 32px;
+  overflow: hidden;
+  transition: filter 0.2s ease;
 }
 
-[data-nttbell="master-text"] strong {
-  font-size: 13px;
-  font-weight: 650;
+.sim-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
   display: block;
 }
 
-[data-nttbell="master-status"] {
-  font-size: 10px;
-  color: var(--nttbell-muted);
+.sim-avatar-user-icon {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00A884 0%, #128C7E 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
 }
-[data-nttbell="master-card"][data-enabled="true"]
-  [data-nttbell="master-status"] {
-  color: var(--nttbell-accent-solid);
-  font-weight: 600;
+
+.sim-avatar-fallback {
+  font-size: 10px;
+  font-weight: 750;
+  color: #fff;
+}
+
+.sim-chat {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.sim-name {
+  font-size: 11px;
+  font-weight: 650;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: filter 0.2s ease;
+}
+
+.sim-msg {
+  font-size: 10.5px;
+  color: var(--whatsapp-muted);
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: filter 0.2s ease;
 }
 
 /* ==========================================
-   SETTINGS LIST & ROWS (Sangat Mampat)
+   QUICK PRESETS BAR
 ========================================== */
-[data-nttbell="section-header"] {
-  margin-bottom: 10px;
-  padding: 0 4px;
-}
-
-[data-nttbell="section-title"] {
-  margin: 0 0 2px 0;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--nttbell-muted);
-}
-
-[data-nttbell="section-description"] {
-  margin: 0;
-  font-size: 10px;
-  color: var(--nttbell-muted);
-}
-
-[data-nttbell="settings-list"] {
-  display: flex;
-  flex-direction: column;
-  background: var(--nttbell-bg);
-  border-radius: 10px;
-  border: 1px solid var(--nttbell-border-light);
-  overflow: hidden;
-}
-
-[data-nttbell="setting-row"] {
+.presets-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--nttbell-border-light);
-  transition: background 0.15s ease;
+  gap: 6px;
 }
 
-[data-nttbell="setting-row"]:last-child {
-  border-bottom: none;
+.preset-chip {
+  flex: 1 1 0;
+  padding: 5px 6px;
+  border: 1px solid var(--whatsapp-border);
+  border-radius: 8px;
+  background: var(--whatsapp-surface);
+  color: var(--whatsapp-text);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
-[data-nttbell="setting-row"]:hover {
-  background: var(--nttbell-surface-hover);
+.preset-chip:hover {
+  background: var(--whatsapp-surface-hover);
+  border-color: var(--whatsapp-accent-solid);
+  color: var(--whatsapp-accent-solid);
 }
 
-[data-nttbell="setting-icon"] {
-  width: 28px;
-  height: 28px;
-  flex: 0 0 28px;
+.preset-chip:active {
+  transform: scale(0.96);
+}
+
+/* ==========================================
+   MASTER SHIELD CARD
+========================================== */
+[data-whatsapp="master-card"] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--whatsapp-surface);
+  border: 1px solid var(--whatsapp-border);
+  border-radius: 12px;
+}
+
+[data-whatsapp="master-info"] {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+[data-whatsapp="master-icon"] {
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  background: var(--nttbell-icon-bg);
-  color: var(--nttbell-muted);
+  background: var(--whatsapp-icon-bg);
+  color: var(--whatsapp-muted);
+  transition: all 0.25s ease;
 }
 
-[data-nttbell="setting-text"] {
-  flex: 1 1 auto;
+[data-whatsapp="master-card"][data-enabled="true"] [data-whatsapp="master-icon"] {
+  background: var(--whatsapp-accent-grad);
+  color: #fff;
+  box-shadow: 0 2px 8px var(--whatsapp-accent-glow);
+}
+
+[data-whatsapp="master-text"] strong {
+  font-size: 12px;
+  font-weight: 700;
+  display: block;
+}
+
+[data-whatsapp="master-status"] {
+  font-size: 10px;
+  color: var(--whatsapp-muted);
+}
+
+[data-whatsapp="master-card"][data-enabled="true"] [data-whatsapp="master-status"] {
+  color: var(--whatsapp-accent-solid);
+  font-weight: 600;
+}
+
+/* ==========================================
+   COMPACT 2-COLUMN SETTINGS GRID
+========================================== */
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+[data-whatsapp="setting-row"] {
   display: flex;
-  flex-direction: column;
-  gap: 1px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 7px 10px;
+  background: var(--whatsapp-surface);
+  border: 1px solid var(--whatsapp-border-light);
+  border-radius: 10px;
+  transition: all 0.15s ease;
+}
+
+[data-whatsapp="setting-row"]:hover {
+  background: var(--whatsapp-surface-hover);
+}
+
+.setting-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
 }
 
-[data-nttbell="setting-text"] strong {
-  font-size: 12px;
+[data-whatsapp="setting-icon"] {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: var(--whatsapp-icon-bg);
+  color: var(--whatsapp-muted);
+}
+
+[data-whatsapp="setting-text"] {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+[data-whatsapp="setting-text"] strong {
+  font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-[data-nttbell="setting-text"] span {
-  font-size: 10px;
-  color: var(--nttbell-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* Highlight Safe Mode tile */
+[data-setting-id="safeScreenShare"] {
+  border-color: rgba(255, 0, 77, 0.35);
+  background: color-mix(in srgb, var(--whatsapp-accent-solid) 6%, transparent);
+}
+
+[data-setting-id="safeScreenShare"] [data-whatsapp="setting-icon"] {
+  background: var(--whatsapp-accent-grad);
+  color: #fff;
+}
+
+.whatsapp-shield-badge {
+  font-size: 7.5px;
+  font-weight: 800;
+  padding: 1px 4px;
+  background: var(--whatsapp-accent-solid);
+  color: #fff;
+  border-radius: 3px;
+  margin-left: 3px;
+  letter-spacing: 0.04em;
 }
 
 /* ==========================================
-   TOGGLE SWITCH (Desain Mewah Gradien)
+   TOGGLE SWITCH (PRECISION COMPACT)
 ========================================== */
-[data-nttbell="switch"] {
+[data-whatsapp="switch"] {
   position: relative;
-  width: 34px;
-  height: 20px;
-  flex: 0 0 34px;
+  width: 30px;
+  height: 18px;
+  flex: 0 0 30px;
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: var(--nttbell-switch-off);
+  background: var(--whatsapp-switch-off);
   cursor: pointer;
-  transition: background 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  outline: none;
+  transition: background 0.25s ease;
 }
 
-[data-nttbell="switch"][aria-pressed="true"] {
-  background: var(--nttbell-accent-grad);
+[data-whatsapp="switch"][aria-pressed="true"] {
+  background: var(--whatsapp-accent-grad);
 }
 
-[data-nttbell="switch-track"] {
+[data-whatsapp="switch-track"] {
   position: absolute;
   inset: 0;
   border-radius: inherit;
 }
 
-[data-nttbell="switch-thumb"] {
+[data-whatsapp="switch-thumb"] {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 0.25s ease;
 }
 
-[data-nttbell="switch"][aria-pressed="true"] [data-nttbell="switch-thumb"] {
-  transform: translateX(14px);
+[data-whatsapp="switch"][aria-pressed="true"] [data-whatsapp="switch-thumb"] {
+  transform: translateX(12px);
 }
 
 /* ==========================================
-   INTENSITY SLIDER
+   PRECISION BLUR SLIDER WITH STEP BUTTONS
 ========================================== */
-[data-nttbell="intensity-header"] {
+[data-whatsapp="intensity"] {
+  padding: 8px 12px;
+  background: var(--whatsapp-surface);
+  border: 1px solid var(--whatsapp-border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+[data-whatsapp="intensity-header"] {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
-  padding: 0 4px;
 }
 
-[data-nttbell="intensity-text"] strong {
-  font-size: 12px;
-  font-weight: 600;
-}
-
-[data-nttbell="blur-value"] {
-  background: var(--nttbell-icon-bg);
-  color: var(--nttbell-text);
-  padding: 3px 8px;
-  border-radius: 6px;
+[data-whatsapp="intensity-text"] strong {
   font-size: 11px;
   font-weight: 650;
-  font-variant-numeric: tabular-nums;
 }
 
-[data-nttbell="slider-wrapper"] {
-  padding: 0 4px 4px;
+.slider-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-[data-nttbell="blur-slider"] {
+.btn-step {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid var(--whatsapp-border);
+  background: var(--whatsapp-bg);
+  color: var(--whatsapp-text);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.btn-step:hover {
+  background: var(--whatsapp-surface-hover);
+  color: var(--whatsapp-accent-solid);
+}
+
+.btn-step:active {
+  transform: scale(0.9);
+}
+
+[data-whatsapp="blur-slider"] {
   -webkit-appearance: none;
   appearance: none;
-  width: 100%;
+  flex: 1 1 auto;
   height: 5px;
-  background: var(--nttbell-border);
+  background: var(--whatsapp-border);
   border-radius: 999px;
   outline: none;
   cursor: pointer;
 }
 
-[data-nttbell="blur-slider"]::-webkit-slider-thumb {
+[data-whatsapp="blur-slider"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background: var(--nttbell-bg);
-  border: 2px solid var(--nttbell-accent-solid);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  background: var(--whatsapp-bg);
+  border: 2px solid var(--whatsapp-accent-solid);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
   cursor: pointer;
-  transition: transform 0.1s;
 }
 
-[data-nttbell="blur-slider"]::-webkit-slider-thumb:active {
-  transform: scale(1.15);
+[data-whatsapp="blur-value"] {
+  background: var(--whatsapp-icon-bg);
+  color: var(--whatsapp-text);
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-size: 10.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ==========================================
-   FOOTER (Coded with ❤️)
+   PINNED FOOTER (ALWAYS VISIBLE - NO SCROLL)
 ========================================== */
-[data-nttbell="footer"] {
+[data-whatsapp="footer"] {
+  flex: 0 0 auto;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 0 10px;
-  color: var(--nttbell-muted);
+  border-top: 1px solid var(--whatsapp-border);
+  background: color-mix(in srgb, var(--whatsapp-bg) 75%, transparent);
+  color: var(--whatsapp-muted);
   font-size: 10px;
-  font-weight: 500;
+  font-weight: 550;
+  letter-spacing: 0.03em;
 }
 
-[data-nttbell="footer"] span {
+[data-whatsapp="footer"] span {
   display: inline-flex;
   align-items: center;
   gap: 4px;
 }
 
+.footer-link {
+  color: var(--whatsapp-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+
+.footer-link:hover {
+  color: var(--whatsapp-accent-solid);
+}
+
+.footer-link-highlight {
+  color: #25d366 !important;
+  font-weight: 750 !important;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+}
+
+.footer-link-highlight:hover {
+  color: #00ffa3 !important;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-shadow: 0 0 8px rgba(0, 255, 163, 0.45);
+}
+
 /* ==========================================
-   GLOBAL BLUR ENGINE UTILITY
+   PRIVACY BLUR ENGINE & TYPING PROTECTION FIX
 ========================================== */
-.nttbell-privacy-blur {
-  filter: blur(var(--nttbell-blur, 6px)) grayscale(20%);
-  transition: filter 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+/* Zero-Lag GPU Composited Filters via HTML Data Attributes */
+html[data-wa-messages="true"] [data-testid="selectable-text"],
+html[data-wa-messages="true"] [data-testid="message-text"],
+html[data-wa-messages="true"] span.selectable-text,
+html[data-wa-messages="true"] [data-testid="link-preview"],
+html[data-wa-messages="true"] [data-testid="link-preview-container"],
+html[data-wa-messages="true"] [data-testid="group-invite-link"],
+html[data-wa-messages="true"] [data-testid="group-invite"],
+html[data-wa-messages="true"] [data-testid="invite-link"],
+html[data-wa-messages="true"] [data-testid="url-preview"],
+html[data-wa-messages="true"] [data-testid="suspicious-link-container"],
+html[data-wa-messages="true"] [data-testid^="conv-msg-"] a,
+html[data-wa-messages="true"] div.message-in a,
+html[data-wa-messages="true"] div.message-out a,
+html[data-wa-messages="true"] div[data-id] a,
+html[data-wa-messages="true"] div.message-in [tabindex="-1"],
+html[data-wa-messages="true"] div.message-out [tabindex="-1"],
+html[data-wa-messages="true"] [data-testid^="conv-msg-"] [tabindex="-1"],
+html[data-wa-contacts="true"] [data-testid="conversation-info-header-chat-title"],
+html[data-wa-contacts="true"] [data-testid="author"],
+html[data-wa-contacts="true"] [data-testid="cell-frame-title"] span[dir="auto"][title],
+html[data-wa-previews="true"] [data-testid="cell-frame-secondary"] span[dir="ltr"]:not([data-testid="msg-meta"] *),
+html[data-wa-previews="true"] [data-testid="cell-frame-secondary"] span[dir="auto"]:not([data-testid="msg-meta"] *),
+html[data-wa-avatars="true"] img[src*="pps.whatsapp.net"],
+html[data-wa-avatars="true"] img[src*="whatsapp.net"],
+html[data-wa-avatars="true"] [data-testid="cell-frame-container"] img,
+html[data-wa-avatars="true"] [data-testid="cell-frame-container"] svg,
+html[data-wa-avatars="true"] [data-testid="cell-frame-icon"],
+html[data-wa-avatars="true"] img[data-testid="avatar"],
+html[data-wa-avatars="true"] img[data-testid="avatar-image"],
+html[data-wa-avatars="true"] img[data-testid="default-user"],
+html[data-wa-avatars="true"] img[data-testid="default-group"],
+html[data-wa-avatars="true"] svg[data-testid="default-user"],
+html[data-wa-avatars="true"] svg[data-testid="default-group"],
+html[data-wa-avatars="true"] [data-testid="avatar-placeholder"],
+html[data-wa-avatars="true"] [data-testid="conversation-header"] img,
+html[data-wa-avatars="true"] [data-testid="conversation-header"] svg,
+html[data-wa-avatars="true"] [data-testid="conversation-info-header"] img,
+html[data-wa-avatars="true"] [data-testid="conversation-info-header"] svg,
+html[data-wa-avatars="true"] [data-testid="contact-info-drawer"] img,
+html[data-wa-avatars="true"] [data-testid="contact-info-drawer"] [style*="border-radius: 50%"],
+html[data-wa-avatars="true"] [data-testid="contact-info-drawer"] [style*="border-radius:50%"],
+html[data-wa-avatars="true"] [data-testid="drawer-right"] img,
+html[data-wa-avatars="true"] [data-testid="drawer-right"] [style*="border-radius: 50%"],
+html[data-wa-avatars="true"] [data-testid="drawer-right"] [style*="border-radius:50%"],
+html[data-wa-avatars="true"] [data-animate-drawer-right="true"] img,
+html[data-wa-avatars="true"] [data-animate-drawer-right="true"] [style*="border-radius: 50%"],
+html[data-wa-avatars="true"] [data-animate-drawer-right="true"] [style*="border-radius:50%"],
+html[data-wa-avatars="true"] div[style*="border-radius: 50%"] img,
+html[data-wa-avatars="true"] div[style*="border-radius:50%"] img,
+html[data-wa-avatars="true"] #main div[role="row"] img,
+html[data-wa-avatars="true"] #main div[data-id] img,
+html[data-wa-avatars="true"] #main [data-testid^="conv-msg-"] img,
+html[data-wa-avatars="true"] #main [data-testid="msg-container"] img,
+html[data-wa-avatars="true"] #main div.message-in img,
+html[data-wa-avatars="true"] #main div.message-out img,
+html[data-wa-avatars="true"] #main [style*="border-radius: 50%"],
+html[data-wa-avatars="true"] #main [style*="border-radius:50%"],
+html[data-wa-avatars="true"] #main [style*="border-radius: 50%"] img,
+html[data-wa-avatars="true"] #main [style*="border-radius:50%"] img,
+html[data-wa-avatars="true"] #main [data-testid*="avatar" i],
+html[data-wa-avatars="true"] #main [data-testid*="avatar" i] img,
+html[data-wa-avatars="true"] #main [data-testid*="avatar" i] svg,
+html[data-wa-avatars="true"] [data-testid="channel-avatar"] img,
+html[data-wa-avatars="true"] [data-testid="community-avatar"] img,
+html[data-wa-media="true"] [data-testid="image-thumb"],
+html[data-wa-media="true"] [data-testid="video-thumb"],
+html[data-wa-media="true"] [data-testid="media-viewer"] img,
+html[data-wa-media="true"] [data-testid="media-viewer"] video,
+html[data-wa-media="true"] [data-testid="image"],
+html[data-wa-media="true"] [data-testid="video"],
+html[data-wa-media="true"] [data-testid="sticker"],
+html[data-wa-media="true"] img[src^="blob:"],
+html[data-wa-media="true"] [data-animate-drawer-right="true"] [role="gridcell"],
+html[data-wa-media="true"] [data-animate-drawer-right="true"] [role="gridcell"] *,
+html[data-wa-media="true"] [data-animate-drawer-right="true"] [data-testid*="media" i],
+html[data-wa-media="true"] [data-animate-drawer-right="true"] [data-testid*="media" i] *,
+html[data-wa-media="true"] [data-animate-drawer-right="true"] [data-testid*="gallery" i],
+html[data-wa-media="true"] [data-animate-drawer-right="true"] [data-testid*="gallery" i] *,
+html[data-wa-media="true"] [data-testid="drawer-right"] [role="gridcell"],
+html[data-wa-media="true"] [data-testid="drawer-right"] [role="gridcell"] *,
+html[data-wa-media="true"] [data-testid="drawer-right"] [data-testid*="media" i],
+html[data-wa-media="true"] [data-testid="drawer-right"] [data-testid*="media" i] *,
+html[data-wa-media="true"] [data-testid="drawer-right"] [data-testid*="gallery" i],
+html[data-wa-media="true"] [data-testid="drawer-right"] [data-testid*="gallery" i] *,
+html[data-wa-media="true"] [data-testid="contact-info-drawer"] [role="gridcell"],
+html[data-wa-media="true"] [data-testid="contact-info-drawer"] [role="gridcell"] *,
+html[data-wa-media="true"] [data-testid*="media-gallery"] [role="gridcell"],
+html[data-wa-media="true"] [data-testid*="media-gallery"] [role="gridcell"] *,
+html[data-wa-media="true"] [data-testid*="media-gallery"] img,
+html[data-wa-media="true"] [data-testid*="media-gallery"] video,
+html[data-wa-media="true"] [data-testid*="media-gallery"] canvas,
+html[data-wa-files="true"] [data-testid="document"],
+html[data-wa-files="true"] [data-testid="document-thumb"],
+html[data-wa-files="true"] [data-testid="document-container"],
+html[data-wa-files="true"] [data-testid="file"],
+html[data-wa-files="true"] [data-testid="file-container"],
+html[data-wa-files="true"] [data-testid="media-document"],
+html[data-wa-files="true"] [data-testid^="conv-msg-"] [data-testid*="document"],
+html[data-wa-files="true"] div.message-in [data-testid*="document"],
+html[data-wa-files="true"] div.message-out [data-testid*="document"],
+html[data-wa-typing="true"] footer div[contenteditable="true"]:not(:focus):not(:focus-within),
+html[data-wa-typing="true"] [data-testid="conversation-compose-box-input"]:not(:focus):not(:focus-within),
+.whatsapp-privacy-blur {
+  filter: blur(var(--whatsapp-blur, 6px)) grayscale(20%);
+  transition: filter 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
   user-select: none;
   -webkit-user-select: none;
 }
 
-.nttbell-privacy-blur:hover {
-  filter: blur(0) grayscale(0%);
+/* WhatsApp default message action dropdown button protection (Prevents it from moving down on hover) */
+[data-testid="down-context"],
+[data-testid="down-context"] *,
+span[data-testid="down-context"],
+div[data-testid="down-context"],
+button[data-testid="down-context"],
+[data-testid="msg-meta"],
+[data-testid="msg-meta"] * {
+  filter: none !important;
+  transform: none !important;
 }
 
-/* ==========================================
-   DISABLED STATES (KONDISI MASTER OFF)
-========================================== */
-[data-nttbell="card-group"][data-master-active="false"] {
-  opacity: 0.5;
-  filter: grayscale(40%);
-  pointer-events: none;
+/* Hover-to-reveal (when Safe Screen-Share is OFF) */
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="selectable-text"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="message-text"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) span.selectable-text:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="link-preview"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="group-invite-link"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="group-invite"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="url-preview"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) div.message-in [tabindex="-1"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) div.message-out [tabindex="-1"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="conversation-info-header-chat-title"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="author"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="cell-frame-title"] span[dir="auto"][title]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="cell-frame-secondary"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="cell-frame-secondary"]:hover *,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="cell-frame-secondary"] span:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="cell-frame-container"]:hover [data-testid="cell-frame-secondary"],
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="cell-frame-container"]:hover [data-testid="cell-frame-secondary"] *,
+html:not([data-whatsapp-safe-screen-share="true"]) img[src*="pps.whatsapp.net"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) img[src*="whatsapp.net"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="cell-frame-container"] img:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="cell-frame-container"] svg:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="cell-frame-icon"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="conversation-header"] img:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) #main div[role="row"] img:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) #main div[data-id] img:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) #main [data-testid^="conv-msg-"] img:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) #main [data-testid="msg-container"] img:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) #main [style*="border-radius: 50%"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) #main [style*="border-radius: 50%"] img:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) div.message-in img:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="drawer-right"] img:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-animate-drawer-right="true"] img:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-animate-drawer-right="true"] [style*="border-radius: 50%"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-animate-drawer-right="true"] [style*="border-radius: 50%"]:hover *,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="drawer-right"] [style*="border-radius: 50%"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="drawer-right"] [style*="border-radius: 50%"]:hover *,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-animate-drawer-right="true"] [role="gridcell"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-animate-drawer-right="true"] [role="gridcell"]:hover *,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="drawer-right"] [role="gridcell"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="drawer-right"] [role="gridcell"]:hover *,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="image-thumb"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="video-thumb"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="document"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="document"]:hover *,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="document-container"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="document-container"]:hover *,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="document-thumb"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="document-thumb"]:hover *,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="file"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="file"]:hover *,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="file-container"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="file-container"]:hover *,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="media-document"]:hover,
+html:not([data-whatsapp-safe-screen-share="true"]) [data-testid="media-document"]:hover *,
+html:not([data-whatsapp-safe-screen-share="true"]) .whatsapp-privacy-blur:hover {
+  filter: blur(0) grayscale(0%) !important;
 }
 
-[data-nttbell="card-group"][data-master-active="false"] button,
-[data-nttbell="card-group"][data-master-active="false"] input {
-  pointer-events: auto;
+/* CRITICAL FIX 1: COMPOSE BOX TYPING SAFETY */
+.whatsapp-privacy-blur[contenteditable="true"] {
+  filter: blur(var(--whatsapp-blur, 6px)) grayscale(20%);
+  transition: filter 0.2s ease;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+/* When typing or focused inside compose box, reveal and allow full typing cursor */
+.whatsapp-privacy-blur[contenteditable="true"]:focus,
+.whatsapp-privacy-blur[contenteditable="true"]:focus-within {
+  filter: none !important;
+  cursor: text !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+/* CRITICAL FIX 2: SAFE SCREEN-SHARING LOCK
+   Locks hover blur on general elements, but NEVER blocks contenteditable */
+[data-whatsapp-safe-screen-share="true"] .whatsapp-privacy-blur:not([contenteditable="true"]):hover {
+  filter: blur(var(--whatsapp-blur, 6px)) grayscale(20%) !important;
   cursor: not-allowed !important;
 }
 
-[data-nttbell="card-group"][data-master-active="false"]
-  [data-nttbell="setting-row"]:hover {
-  background: transparent;
+/* Disabled States when Master is OFF */
+[data-master-active="false"] {
+  opacity: 0.55;
+  filter: grayscale(30%);
+}
+
+[data-master-active="false"] button,
+[data-master-active="false"] input {
+  cursor: not-allowed !important;
 }
 
 /* ==========================================
    TOAST NOTIFICATION (SHORTCUT FEEDBACK)
 ========================================== */
-[data-nttbell="toast"] {
+#whatsapp-assistant-toast {
   position: fixed;
-  bottom: 40px;
+  bottom: 30px;
   left: 50%;
   transform: translateX(-50%) translateY(20px);
-  z-index: 999999;
+  z-index: 9999999;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 14px 8px 8px;
-  background: var(--nttbell-surface);
-  border: 1px solid var(--nttbell-border);
+  gap: 9px;
+  padding: 7px 14px 7px 8px;
+  background: var(--whatsapp-surface);
+  border: 1px solid var(--whatsapp-border);
   border-radius: 999px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-  color: var(--nttbell-text);
-  font-size: 12px;
-  font-weight: 600;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
+  color: var(--whatsapp-text);
+  font-size: 11.5px;
+  font-weight: 650;
   opacity: 0;
   pointer-events: none;
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
   transition:
-    transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
-    opacity 0.3s ease;
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.25s ease;
 }
 
-[data-nttbell="toast"].show {
+#whatsapp-assistant-toast.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
 
-[data-nttbell="toast-icon"] {
+[data-whatsapp="toast-icon"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background: var(--nttbell-icon-bg);
-  color: var(--nttbell-muted);
-  transition: all 0.3s ease;
+  background: var(--whatsapp-icon-bg);
+  color: var(--whatsapp-muted);
+  transition: all 0.25s ease;
 }
 
-[data-nttbell="toast"][data-active="true"] [data-nttbell="toast-icon"] {
-  background: var(--nttbell-accent-grad);
+#whatsapp-assistant-toast[data-active="true"] [data-whatsapp="toast-icon"] {
+  background: var(--whatsapp-accent-grad);
   color: #fff;
-  box-shadow: 0 2px 8px var(--nttbell-accent-glow);
+  box-shadow: 0 2px 8px var(--whatsapp-accent-glow);
+}
+
+/* ==========================================
+   ABOUT EXTENSION VIEW
+========================================== */
+.about-container {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--whatsapp-scrollbar) transparent;
+}
+
+.about-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 5px;
+  padding: 6px 0 2px 0;
+}
+
+.about-hero-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+}
+
+.about-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+}
+
+.about-tagline {
+  font-size: 11px;
+  color: var(--whatsapp-muted);
+  font-weight: 500;
+}
+
+.about-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.about-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: var(--whatsapp-accent-grad);
+  color: #fff;
+}
+
+.about-badge-green {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.about-badge-blue {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.about-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.about-card {
+  padding: 10px 12px;
+  background: var(--whatsapp-surface);
+  border: 1px solid var(--whatsapp-border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.about-card strong {
+  font-size: 11.5px;
+  font-weight: 650;
+  color: var(--whatsapp-text);
+}
+
+.about-card p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--whatsapp-muted);
+}
+
+.about-card code {
+  background: var(--whatsapp-icon-bg);
+  color: var(--whatsapp-text);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+}
+
+.about-links {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.about-link-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--whatsapp-bg);
+  border: 1px solid var(--whatsapp-border);
+  border-radius: 9px;
+  color: var(--whatsapp-text);
+  text-decoration: none;
+  font-size: 11.5px;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.about-link-pill .link-label {
+  flex: 1 1 auto;
+}
+
+/* WhatsApp Link */
+.about-link-pill.link-wa {
+  border-color: rgba(37, 211, 102, 0.28);
+  background: rgba(37, 211, 102, 0.05);
+}
+.about-link-pill.link-wa:hover {
+  background: rgba(37, 211, 102, 0.16);
+  border-color: #25d366;
+  color: #25d366;
+  box-shadow: 0 0 12px rgba(37, 211, 102, 0.25);
+  transform: translateY(-1px);
+}
+
+/* GitHub Link */
+.about-link-pill.link-github {
+  border-color: rgba(192, 132, 252, 0.28);
+  background: rgba(192, 132, 252, 0.05);
+}
+.about-link-pill.link-github:hover {
+  background: rgba(192, 132, 252, 0.16);
+  border-color: #c084fc;
+  color: #c084fc;
+  box-shadow: 0 0 12px rgba(192, 132, 252, 0.25);
+  transform: translateY(-1px);
+}
+
+/* Instagram Link */
+.about-link-pill.link-ig {
+  border-color: rgba(225, 48, 108, 0.28);
+  background: rgba(225, 48, 108, 0.05);
+}
+.about-link-pill.link-ig:hover {
+  background: rgba(225, 48, 108, 0.16);
+  border-color: #e1306c;
+  color: #e1306c;
+  box-shadow: 0 0 12px rgba(225, 48, 108, 0.25);
+  transform: translateY(-1px);
+}
+
+/* Telegram Link */
+.about-link-pill.link-tele {
+  border-color: rgba(34, 158, 217, 0.28);
+  background: rgba(34, 158, 217, 0.05);
+}
+.about-link-pill.link-tele:hover {
+  background: rgba(34, 158, 217, 0.16);
+  border-color: #229ed9;
+  color: #229ed9;
+  box-shadow: 0 0 12px rgba(34, 158, 217, 0.25);
+  transform: translateY(-1px);
+}
+
+/* Report Bug Card */
+.report-bug-card {
+  border-color: rgba(37, 211, 102, 0.25) !important;
+  background: rgba(37, 211, 102, 0.04) !important;
+}
+
+.report-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.report-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(37, 211, 102, 0.15);
+  color: #25d366;
+  border: 1px solid rgba(37, 211, 102, 0.3);
+  letter-spacing: 0.3px;
+}
+
+.bug-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.bug-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--whatsapp-bg);
+  border: 1px solid var(--whatsapp-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: var(--whatsapp-text);
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1.4;
+  resize: vertical;
+  min-height: 48px;
+  max-height: 120px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bug-textarea:focus {
+  border-color: #25d366;
+  box-shadow: 0 0 8px rgba(37, 211, 102, 0.25);
+}
+
+.bug-textarea::placeholder {
+  color: var(--whatsapp-muted);
+  opacity: 0.8;
+}
+
+.btn-report-wa {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 12px;
+  background: #25d366;
+  color: #ffffff !important;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-report-wa:hover {
+  background: #1ebc57;
+  box-shadow: 0 3px 12px rgba(37, 211, 102, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn-report-wa:active {
+  transform: translateY(0);
+}
+
+.btn-about-back {
+  margin-top: 4px;
+  padding: 8px 12px;
+  border: 1px solid var(--whatsapp-border);
+  border-radius: 9px;
+  background: var(--whatsapp-surface);
+  color: var(--whatsapp-text);
+  font-size: 11px;
+  font-weight: 650;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.btn-about-back:hover {
+  background: var(--whatsapp-surface-hover);
+  border-color: var(--whatsapp-accent-solid);
 }

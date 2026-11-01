@@ -1,9 +1,9 @@
-﻿import { WHATSAPP_SELECTORS } from "./selectors";
-import { createNttbellItem, getNttbellButton } from "../ui/nttbell-button";
+import { WHATSAPP_SELECTORS } from "./selectors";
+import { createWhatsAppItem, getWhatsAppButton } from "../ui/whatsapp-button";
 
 let isInjecting = false;
 
-export function injectNttbellButton(): void {
+export function injectWhatsAppButton(): void {
   if (isInjecting) {
     return;
   }
@@ -11,13 +11,13 @@ export function injectNttbellButton(): void {
   isInjecting = true;
 
   try {
-    const existingButton = getNttbellButton();
+    const existingButton = getWhatsAppButton();
 
     if (existingButton && existingButton.isConnected) {
       return;
     }
 
-    const nttbellItem = createNttbellItem();
+    const whatsappItem = createWhatsAppItem();
     const metaAIButton = document.querySelector<HTMLButtonElement>(
       WHATSAPP_SELECTORS.metaAI,
     );
@@ -33,10 +33,14 @@ export function injectNttbellButton(): void {
 
       const navbarContainer = metaAIDivOuter.parentElement;
       if (!navbarContainer) return;
-      if (navbarContainer.querySelector('button[data-nttbell="navbar-item"]')) {
+      if (
+        navbarContainer.querySelector(
+          'button[data-whatsapp="navbar-item"]',
+        )
+      ) {
         return;
       }
-      navbarContainer.insertBefore(nttbellItem, metaAIDivOuter.nextSibling);
+      navbarContainer.insertBefore(whatsappItem, metaAIDivOuter.nextSibling);
     } else {
       const primaryNavbarContainer = document.querySelector<HTMLDivElement>(
         '[data-testid="navbar-primary-section"] > div > div',
@@ -45,12 +49,12 @@ export function injectNttbellButton(): void {
       if (primaryNavbarContainer) {
         if (
           primaryNavbarContainer.querySelector(
-            'button[data-nttbell="navbar-item"]',
+            'button[data-whatsapp="navbar-item"]',
           )
         ) {
           return;
         }
-        primaryNavbarContainer.appendChild(nttbellItem);
+        primaryNavbarContainer.appendChild(whatsappItem);
       }
     }
   } finally {

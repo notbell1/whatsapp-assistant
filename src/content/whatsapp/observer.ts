@@ -1,6 +1,8 @@
-﻿import { injectNttbellButton } from "./navigation";
+import { injectWhatsAppButton } from "./navigation";
+import { isWhatsAppButtonConnected } from "../ui/whatsapp-button";
 
 let observer: MutationObserver | null = null;
+let debounceTimer: number | null = null;
 
 export function startWhatsAppObserver(): void {
   if (observer) {
@@ -8,7 +10,21 @@ export function startWhatsAppObserver(): void {
   }
 
   observer = new MutationObserver(() => {
-    injectNttbellButton();
+    // Ultra-fast check: if button is already in DOM, do zero work
+    if (isWhatsAppButtonConnected()) {
+      return;
+    }
+
+    if (debounceTimer !== null) {
+      return;
+    }
+
+    debounceTimer = window.setTimeout(() => {
+      debounceTimer = null;
+      if (!isWhatsAppButtonConnected()) {
+        injectWhatsAppButton();
+      }
+    }, 250);
   });
 
   observer.observe(document.body, {
@@ -16,5 +32,5 @@ export function startWhatsAppObserver(): void {
     subtree: true,
   });
 
-  injectNttbellButton();
+  injectWhatsAppButton();
 }

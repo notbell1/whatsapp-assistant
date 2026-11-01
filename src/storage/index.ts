@@ -1,9 +1,10 @@
-import type { NttbellPrivacySettings } from "./types";
+import type { WhatsAppAssistantSettings } from "./types";
 
-const STORAGE_KEY = "nttbellPrivacySettings";
+export const STORAGE_KEY = "whatsappAssistantSettings";
+export const LEGACY_STORAGE_KEY = "whatsappPrivacySettings";
 
-export const DEFAULT_PRIVACY_SETTINGS: NttbellPrivacySettings = {
-  enabled: false,
+export const DEFAULT_SETTINGS: WhatsAppAssistantSettings = {
+  enabled: true,
 
   messages: false,
   contactNames: false,
@@ -11,33 +12,69 @@ export const DEFAULT_PRIVACY_SETTINGS: NttbellPrivacySettings = {
   media: false,
   files: false,
   chatPreview: false,
+  composeBox: false,
+  safeScreenShare: false,
 
   blurIntensity: 6,
 };
 
-export async function loadPrivacySettings(): Promise<NttbellPrivacySettings> {
-  const result = await chrome.storage.local.get(STORAGE_KEY);
+export const DEFAULT_PRIVACY_SETTINGS = DEFAULT_SETTINGS;
 
-  const stored = result[STORAGE_KEY] as
-    | Partial<NttbellPrivacySettings>
-    | undefined;
+function isExtensionValid(): boolean {
+  try {
+    return Boolean(typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.id);
+  } catch {
+    return false;
+  }
+}
 
-  return {
-    ...DEFAULT_PRIVACY_SETTINGS,
-    ...(stored ?? {}),
-  };
+export async function loadPrivacySettings(): Promise<WhatsAppAssistantSettings> {
+  if (!isExtensionValid()) {
+    return DEFAULT_SETTINGS;
+  }
+
+  try {
+    const result = await chrome.storage.local.get([STORAGE_KEY, LEGACY_STORAGE_KEY]);
+
+    const stored = (result[STORAGE_KEY] ?? result[LEGACY_STORAGE_KEY]) as
+      | Partial<WhatsAppAssistantSettings>
+      | undefined;
+
+    return {
+      ...DEFAULT_SETTINGS,
+      ...(stored ?? {}),
+    };
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
 }
 
 export async function savePrivacySettings(
-  settings: NttbellPrivacySettings,
+  settings: WhatsAppAssistantSettings,
 ): Promise<void> {
-  await chrome.storage.local.set({
-    [STORAGE_KEY]: settings,
-  });
+  if (!isExtensionValid()) {
+    return;
+  }
+
+  try {
+    await chrome.storage.local.set({
+      [STORAGE_KEY]: settings,
+    });
+  } catch {
+    // Ignore error if extension context was invalidated during reload
+  }
 }
 
 export async function resetPrivacySettings(): Promise<void> {
-  await chrome.storage.local.set({
-    [STORAGE_KEY]: DEFAULT_PRIVACY_SETTINGS,
-  });
+  if (!isExtensionValid()) {
+    return;
+  }
+
+  try {
+    await chrome.storage.local.set({
+      [STORAGE_KEY]: DEFAULT_SETTINGS,
+    });
+  } catch {
+    // Ignore error
+  }
 }

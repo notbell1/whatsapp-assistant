@@ -1,17 +1,15 @@
 import {
   applyBlur,
   removeBlur,
-  updateBlurIntensity as updateElementBlurIntensity,
-  NTTBELL_BLUR_CLASS,
+  clampIntensity,
+  WHATSAPP_BLUR_CLASS,
 } from "./blur";
 
 import { PRIVACY_SELECTORS } from "./selectors";
-
 import { loadPrivacySettings, savePrivacySettings } from "../../storage";
+import type { WhatsAppAssistantSettings } from "../../storage/types";
 
-import type { NttbellPrivacySettings } from "../../storage/types";
-
-export type PrivacyEngineSettings = NttbellPrivacySettings;
+export type PrivacyEngineSettings = WhatsAppAssistantSettings;
 
 const MESSAGE_META_SELECTORS = [
   '[data-testid="msg-meta"]',
@@ -28,11 +26,12 @@ const STATUS_TITLE_KEYWORDS = [
 ];
 
 const IGNORE_SELECTORS = [
-  '[data-nttbell="view"]',
-  '[data-nttbell="item"]',
-  '[data-nttbell="container"]',
-  '[data-nttbell="navbar-item"]',
-  '[data-nttbell="icon"]',
+  '[data-whatsapp="view"]',
+  '[data-whatsapp="item"]',
+  '[data-whatsapp="container"]',
+  '[data-whatsapp="navbar-item"]',
+  '[data-whatsapp="icon"]',
+  "#whatsapp-assistant-toast",
 ];
 
 const CONTACT_NAME_SELECTORS = [
@@ -43,10 +42,7 @@ const CONTACT_NAME_SELECTORS = [
 
 const CHAT_PREVIEW_SELECTORS = ['[data-testid="cell-frame-secondary"]'];
 
-const SIDEBAR_AVATAR_SELECTORS = [
-  '[data-testid="cell-frame-container"] img[width="48"][height="48"]',
-  '[data-testid="cell-frame-container"] svg[width="48"][height="48"]',
-];
+const SIDEBAR_AVATAR_SELECTORS = [...PRIVACY_SELECTORS.profilePictures];
 
 const MESSAGE_TEXT_SELECTORS = [
   '[data-testid^="conv-msg-"] [data-testid="selectable-text"]',
@@ -56,6 +52,25 @@ const MESSAGE_TEXT_SELECTORS = [
   '[data-testid="message-text"]',
   "span.selectable-text",
 ];
+
+const LINK_PREVIEW_SELECTORS = [
+  '[data-testid="link-preview"]',
+  '[data-testid="link-preview-container"]',
+  '[data-testid="group-invite-link"]',
+  '[data-testid="group-invite"]',
+  '[data-testid="invite-link"]',
+  '[data-testid="url-preview"]',
+  '[data-testid="suspicious-link-container"]',
+  '[data-testid^="conv-msg-"] a',
+  'div.message-in a',
+  'div.message-out a',
+  'div[data-id] a',
+  'div.message-in [tabindex="-1"]',
+  'div.message-out [tabindex="-1"]',
+  '[data-testid^="conv-msg-"] [tabindex="-1"]',
+];
+
+const COMPOSE_BOX_SELECTORS = [...PRIVACY_SELECTORS.composeBox];
 const PROFILE_PICTURE_SELECTORS = [...PRIVACY_SELECTORS.profilePictures];
 const MEDIA_SELECTORS = [...PRIVACY_SELECTORS.media];
 const FILE_SELECTORS = [...PRIVACY_SELECTORS.files];
@@ -64,93 +79,82 @@ const FILE_SELECTORS = [...PRIVACY_SELECTORS.files];
  * ENGINE STATE
  * ========================================================= */
 
-let privacySettings: NttbellPrivacySettings | null = null;
-
+let privacySettings: WhatsAppAssistantSettings | null = null;
 let observer: MutationObserver | null = null;
-
-let scanTimer: number | null = null;
-
 let scanFrame: number | null = null;
-
 let isScanning = false;
-
+let hasPendingScan = false;
 let engineStarted = false;
 
 /* =========================================================
  * PUBLIC API
  * ========================================================= */
+
 export async function startPrivacyEngine(
   initialSettings?: PrivacyEngineSettings,
 ): Promise<void> {
   if (engineStarted) {
     if (initialSettings) {
-      await updatePrivacySettings(initialSettings);
+      applySettingsDirectly(initialSettings);
     }
-
     return;
   }
 
   engineStarted = true;
 
   if (initialSettings) {
-    privacySettings = {
-      ...initialSettings,
-    };
+    privacySettings = { ...initialSettings };
   } else {
     privacySettings = await loadPrivacySettings();
   }
 
+  syncRootStyles();
   startObserver();
-  startPeriodicScan();
-
-  scheduleScan();
+  processPrivacy();
 }
+
+export function applySettingsDirectly(settings: PrivacyEngineSettings): void {
+  privacySettings = { ...settings };
+  syncRootStyles();
+  void savePrivacySettings(privacySettings);
+  processPrivacy(); // Synchronous immediate DOM scan for 100% real-time response
+}
+
 export async function updatePrivacySettings(
   settings: PrivacyEngineSettings,
 ): Promise<void> {
-  privacySettings = {
-    ...settings,
-  };
-
-  await savePrivacySettings(privacySettings);
-
-  scheduleScan();
+  applySettingsDirectly(settings);
 }
+
 export function getPrivacySettings(): PrivacyEngineSettings | null {
   if (!privacySettings) {
     return null;
   }
-
-  return {
-    ...privacySettings,
-  };
+  return { ...privacySettings };
 }
+
 export function stopPrivacyEngine(): void {
   if (observer) {
     observer.disconnect();
     observer = null;
   }
 
-  if (scanTimer !== null) {
-    window.clearInterval(scanTimer);
-
-    scanTimer = null;
-  }
-
   if (scanFrame !== null) {
     window.cancelAnimationFrame(scanFrame);
-
     scanFrame = null;
   }
 
   cleanupAllBlur();
+  resetRootStyles();
 
   privacySettings = null;
   engineStarted = false;
 }
+
 export function scanPrivacyTargets(): void {
   scheduleScan();
 }
+
 export function updateBlurIntensity(intensity: number): void {
   if (!privacySettings) {
     return;
@@ -161,13 +165,53 @@ export function updateBlurIntensity(intensity: number): void {
     blurIntensity: intensity,
   };
 
-  updateExistingBlurIntensity(intensity);
-
+  syncRootStyles();
   scheduleScan();
 }
 
 /* =========================================================
- * OBSERVER
+ * ROOT STYLES (Performance & Screen-Sharing mode)
+ * ========================================================= */
+
+function syncRootStyles(): void {
+  if (!privacySettings) return;
+
+  const intensity = clampIntensity(privacySettings.blurIntensity);
+  document.documentElement.style.setProperty("--whatsapp-blur", `${intensity}px`);
+
+  const active = Boolean(privacySettings.enabled);
+  document.documentElement.setAttribute("data-wa-active", String(active));
+  document.documentElement.setAttribute("data-wa-messages", String(active && privacySettings.messages));
+  document.documentElement.setAttribute("data-wa-contacts", String(active && privacySettings.contactNames));
+  document.documentElement.setAttribute("data-wa-avatars", String(active && privacySettings.profilePictures));
+  document.documentElement.setAttribute("data-wa-media", String(active && privacySettings.media));
+  document.documentElement.setAttribute("data-wa-files", String(active && privacySettings.files));
+  document.documentElement.setAttribute("data-wa-previews", String(active && privacySettings.chatPreview));
+  document.documentElement.setAttribute("data-wa-typing", String(active && privacySettings.composeBox));
+
+  // Safe Screen-Sharing Mode lock
+  if (active && privacySettings.safeScreenShare) {
+    document.documentElement.setAttribute("data-whatsapp-safe-screen-share", "true");
+  } else {
+    document.documentElement.removeAttribute("data-whatsapp-safe-screen-share");
+  }
+}
+
+function resetRootStyles(): void {
+  document.documentElement.style.removeProperty("--whatsapp-blur");
+  document.documentElement.removeAttribute("data-whatsapp-safe-screen-share");
+  document.documentElement.removeAttribute("data-wa-active");
+  document.documentElement.removeAttribute("data-wa-messages");
+  document.documentElement.removeAttribute("data-wa-contacts");
+  document.documentElement.removeAttribute("data-wa-avatars");
+  document.documentElement.removeAttribute("data-wa-media");
+  document.documentElement.removeAttribute("data-wa-files");
+  document.documentElement.removeAttribute("data-wa-previews");
+  document.documentElement.removeAttribute("data-wa-typing");
+}
+
+/* =========================================================
+ * OBSERVER (High-performance mutation filter)
  * ========================================================= */
 
 function startObserver(): void {
@@ -175,8 +219,20 @@ function startObserver(): void {
     return;
   }
 
-  observer = new MutationObserver(() => {
-    scheduleScan();
+  observer = new MutationObserver((mutations) => {
+    let hasRelevantMutation = false;
+    for (let i = 0; i < mutations.length; i++) {
+      const target = mutations[i].target as Node;
+      if (target instanceof Element && shouldIgnoreElement(target)) {
+        continue;
+      }
+      hasRelevantMutation = true;
+      break;
+    }
+
+    if (hasRelevantMutation) {
+      scheduleScan();
+    }
   });
 
   observer.observe(document.body, {
@@ -186,30 +242,27 @@ function startObserver(): void {
   });
 }
 
-function startPeriodicScan(): void {
+/* =========================================================
+ * SCAN SCHEDULER (Debounced for 60FPS Smoothness)
+ * ========================================================= */
+
+let scanTimer: number | null = null;
+
+function scheduleScan(): void {
   if (scanTimer !== null) {
     return;
   }
 
-  scanTimer = window.setInterval(() => {
-    scheduleScan();
-  }, 1200);
-}
-
-/* =========================================================
- * SCAN SCHEDULER
- * ========================================================= */
-
-function scheduleScan(): void {
-  if (scanFrame !== null) {
-    return;
-  }
-
-  scanFrame = window.requestAnimationFrame(() => {
-    scanFrame = null;
-
-    processPrivacy();
-  });
+  scanTimer = window.setTimeout(() => {
+    scanTimer = null;
+    if (scanFrame !== null) {
+      window.cancelAnimationFrame(scanFrame);
+    }
+    scanFrame = window.requestAnimationFrame(() => {
+      scanFrame = null;
+      processPrivacy();
+    });
+  }, 80);
 }
 
 /* =========================================================
@@ -217,15 +270,17 @@ function scheduleScan(): void {
  * ========================================================= */
 
 function processPrivacy(): void {
-  if (isScanning) {
-    return;
-  }
-
   if (!privacySettings) {
     return;
   }
 
+  if (isScanning) {
+    hasPendingScan = true;
+    return;
+  }
+
   isScanning = true;
+  hasPendingScan = false;
 
   try {
     if (!privacySettings.enabled) {
@@ -233,77 +288,56 @@ function processPrivacy(): void {
       return;
     }
 
-    /*
-     * =====================================================
-     * MESSAGES
-     * =====================================================
-     */
     if (privacySettings.messages) {
       processMessages();
     } else {
       cleanupCategory(getMessageElements());
     }
 
-    /*
-     * =====================================================
-     * CONTACT / GROUP NAMES
-     * =====================================================
-     */
     if (privacySettings.contactNames) {
       processContactNames();
     } else {
       cleanupCategory(getContactNameElements());
     }
 
-    /*
-     * =====================================================
-     * PROFILE PICTURES
-     * =====================================================
-     */
     if (privacySettings.profilePictures) {
       processProfilePictures();
     } else {
       cleanupCategory(getProfilePictureElements());
-
       cleanupSidebarAvatars();
     }
 
-    /*
-     * =====================================================
-     * MEDIA
-     * =====================================================
-     */
     if (privacySettings.media) {
       processMedia();
     } else {
       cleanupCategory(getMediaElements());
     }
 
-    /*
-     * =====================================================
-     * FILES
-     * =====================================================
-     */
     if (privacySettings.files) {
       processFiles();
     } else {
       cleanupCategory(getFileElements());
     }
 
-    /*
-     * =====================================================
-     * CHAT PREVIEW
-     * =====================================================
-     */
     if (privacySettings.chatPreview) {
       processChatPreviews();
     } else {
       cleanupCategory(getChatPreviewElements());
     }
 
+    if (privacySettings.composeBox) {
+      processComposeBox();
+    } else {
+      cleanupCategory(getComposeBoxElements());
+    }
+
     cleanupProtectedMetadata();
   } finally {
     isScanning = false;
+    if (hasPendingScan) {
+      hasPendingScan = false;
+      scheduleScan();
+    }
   }
 }
 
@@ -315,11 +349,7 @@ function processContactNames(): void {
   const elements = getContactNameElements();
 
   elements.forEach((element) => {
-    if (shouldIgnoreElement(element)) {
-      return;
-    }
-
-    if (hasContactNameAncestor(element)) {
+    if (shouldIgnoreElement(element) || hasContactNameAncestor(element)) {
       return;
     }
 
@@ -327,33 +357,28 @@ function processContactNames(): void {
       return;
     }
 
-    applyBlur(element, getBlurIntensity());
+    applyBlur(element);
   });
 }
 
 function getContactNameElements(): HTMLElement[] {
   const elements: HTMLElement[] = [];
-
   CONTACT_NAME_SELECTORS.forEach((selector) => {
     document.querySelectorAll<HTMLElement>(selector).forEach((element) => {
       elements.push(element);
     });
   });
-
   return uniqueElements(elements);
 }
 
 function hasContactNameAncestor(element: HTMLElement): boolean {
   let parent = element.parentElement;
-
   while (parent) {
     if (isContactNameElement(parent)) {
       return true;
     }
-
     parent = parent.parentElement;
   }
-
   return false;
 }
 
@@ -373,55 +398,58 @@ function processMessages(): void {
   const elements = getMessageElements();
 
   elements.forEach((element) => {
-    if (shouldIgnoreElement(element)) {
+    if (
+      shouldIgnoreElement(element) ||
+      isInsideMessageMeta(element) ||
+      isMessageStatusElement(element) ||
+      isLikelyMessageTime(element) ||
+      !isActualMessageText(element)
+    ) {
       return;
     }
 
-    if (isInsideMessageMeta(element)) {
-      return;
-    }
-
-    if (isMessageStatusElement(element)) {
-      return;
-    }
-
-    if (isLikelyMessageTime(element)) {
-      return;
-    }
-
-    if (!isActualMessageText(element)) {
-      return;
-    }
-
-    applyBlur(element, getBlurIntensity());
+    applyBlur(element);
   });
 }
+
 function getMessageElements(): HTMLElement[] {
   const elements: HTMLElement[] = [];
-
-  MESSAGE_TEXT_SELECTORS.forEach((selector) => {
+  const selectors = [...MESSAGE_TEXT_SELECTORS, ...LINK_PREVIEW_SELECTORS];
+  selectors.forEach((selector) => {
     document.querySelectorAll<HTMLElement>(selector).forEach((element) => {
       elements.push(element);
     });
   });
-
   return uniqueElements(elements);
 }
 
-function isActualMessageText(element: HTMLElement): boolean {
-  if (element.matches('[data-testid="selectable-text"]')) {
+function isLinkPreviewCard(element: HTMLElement): boolean {
+  if (
+    element.matches('[data-testid="link-preview"]') ||
+    element.matches('[data-testid="link-preview-container"]') ||
+    element.matches('[data-testid="group-invite-link"]') ||
+    element.matches('[data-testid="group-invite"]') ||
+    element.matches('[data-testid="invite-link"]') ||
+    element.matches('[data-testid="url-preview"]') ||
+    element.matches('[data-testid="suspicious-link-container"]') ||
+    element.matches('a[href]') ||
+    element.matches('[role="link"]')
+  ) {
     return true;
   }
-
-  if (element.matches('[data-testid="message-text"]')) {
+  if (element.matches('[tabindex="-1"]') && element.querySelector('a, img, svg')) {
     return true;
   }
-
-  if (element.matches("span.selectable-text")) {
-    return true;
-  }
-
   return false;
+}
+
+function isActualMessageText(element: HTMLElement): boolean {
+  return (
+    element.matches('[data-testid="selectable-text"]') ||
+    element.matches('[data-testid="message-text"]') ||
+    element.matches("span.selectable-text") ||
+    isLinkPreviewCard(element)
+  );
 }
 
 function isLikelyMessageTime(element: HTMLElement): boolean {
@@ -429,21 +457,15 @@ function isLikelyMessageTime(element: HTMLElement): boolean {
     return true;
   }
 
-  if (element.matches('[data-testid="selectable-text"]')) {
-    return false;
-  }
-
-  if (element.matches('[data-testid="message-text"]')) {
+  if (
+    element.matches('[data-testid="selectable-text"]') ||
+    element.matches('[data-testid="message-text"]')
+  ) {
     return false;
   }
 
   const text = element.textContent?.trim() ?? "";
-
-  if (/^\d{1,2}[.:]\d{2}$/.test(text)) {
-    return true;
-  }
-
-  return false;
+  return /^\d{1,2}[.:]\d{2}$/.test(text);
 }
 
 /* =========================================================
@@ -458,23 +480,18 @@ function processChatPreviews(): void {
       return;
     }
 
-    processPreviewContainer(container);
-  });
-}
+    const statusRoots = Array.from(
+      container.querySelectorAll<HTMLElement>('[data-testid="last-msg-status"]'),
+    );
 
-function processPreviewContainer(container: HTMLElement): void {
-  const statusRoots = Array.from(
-    container.querySelectorAll<HTMLElement>('[data-testid="last-msg-status"]'),
-  );
+    if (statusRoots.length === 0) {
+      processFallbackPreviewText(container);
+      return;
+    }
 
-  if (statusRoots.length === 0) {
-    processFallbackPreviewText(container);
-
-    return;
-  }
-
-  statusRoots.forEach((statusRoot) => {
-    processPreviewStatusRoot(statusRoot);
+    statusRoots.forEach((statusRoot) => {
+      processPreviewStatusRoot(statusRoot);
+    });
   });
 }
 
@@ -482,106 +499,57 @@ function processPreviewStatusRoot(statusRoot: HTMLElement): void {
   protectStatusInside(statusRoot);
 
   const candidates: HTMLElement[] = [];
-
   statusRoot
-    .querySelectorAll<HTMLElement>('span[dir="ltr"], span[dir="auto"]')
-    .forEach((element) => {
-      candidates.push(element);
-    });
-
-  statusRoot
-    .querySelectorAll<HTMLElement>(":scope > span")
+    .querySelectorAll<HTMLElement>('span[dir="ltr"], span[dir="auto"], :scope > span')
     .forEach((element) => {
       candidates.push(element);
     });
 
   uniqueElements(candidates).forEach((element) => {
-    if (shouldIgnoreElement(element)) {
+    if (
+      shouldIgnoreElement(element) ||
+      element.matches('[data-testid="last-msg-status"]') ||
+      element.closest('[aria-hidden="true"]') ||
+      containsWhatsAppStatus(element) ||
+      isLikelyTimeElement(element) ||
+      !hasVisibleTextOrContent(element)
+    ) {
       return;
     }
 
-    /*
-     * Never blur the last-msg-status root itself.
-     */
-    if (isPreviewStatusElement(element)) {
-      return;
-    }
-
-    /*
-     * Never blur an aria-hidden status wrapper.
-     */
-    if (element.closest('[aria-hidden="true"]')) {
-      return;
-    }
-
-    /*
-     * Never blur status-bearing elements.
-     */
-    if (containsWhatsAppStatus(element)) {
-      return;
-    }
-
-    /*
-     * Never blur time.
-     */
-    if (isLikelyTimeElement(element)) {
-      return;
-    }
-
-    if (!hasVisibleTextOrContent(element)) {
-      return;
-    }
-
-    applyBlur(element, getBlurIntensity());
+    applyBlur(element);
   });
 
-  /*
-   * Final status protection.
-   */
   protectStatusInside(statusRoot);
 }
 
 function processFallbackPreviewText(container: HTMLElement): void {
   const candidates = Array.from(
-    container.querySelectorAll<HTMLElement>(
-      'span[dir="ltr"], span[dir="auto"]',
-    ),
+    container.querySelectorAll<HTMLElement>('span[dir="ltr"], span[dir="auto"]'),
   );
 
   candidates.forEach((element) => {
-    if (shouldIgnoreElement(element)) {
+    if (
+      shouldIgnoreElement(element) ||
+      element.closest('[aria-hidden="true"]') ||
+      containsWhatsAppStatus(element) ||
+      isLikelyTimeElement(element)
+    ) {
       return;
     }
 
-    if (element.closest('[aria-hidden="true"]')) {
-      return;
-    }
-
-    if (containsWhatsAppStatus(element)) {
-      return;
-    }
-
-    if (isLikelyTimeElement(element)) {
-      return;
-    }
-
-    applyBlur(element, getBlurIntensity());
+    applyBlur(element);
   });
 }
 
 function getChatPreviewElements(): HTMLElement[] {
   const elements: HTMLElement[] = [];
-
   CHAT_PREVIEW_SELECTORS.forEach((selector) => {
     document.querySelectorAll<HTMLElement>(selector).forEach((element) => {
       elements.push(element);
     });
   });
-
   return uniqueElements(elements);
-}
-function isPreviewStatusElement(element: HTMLElement): boolean {
-  return element.matches('[data-testid="last-msg-status"]');
 }
 
 /* =========================================================
@@ -592,29 +560,16 @@ function processProfilePictures(): void {
   processSidebarAvatars();
 
   const elements = getProfilePictureElements();
-
   elements.forEach((element) => {
-    if (shouldIgnoreElement(element)) {
+    if (
+      shouldIgnoreElement(element) ||
+      isInsideContactNameContainer(element) ||
+      hasBlurredAncestor(element)
+    ) {
       return;
     }
 
-    /*
-     * Emoji in contact names is not a profile
-     * picture.
-     */
-    if (isInsideContactNameContainer(element)) {
-      return;
-    }
-
-    /*
-     * Don't duplicate a blur already applied
-     * to a parent.
-     */
-    if (hasBlurredAncestor(element)) {
-      return;
-    }
-
-    applyBlur(element, getBlurIntensity());
+    applyBlur(element);
   });
 }
 
@@ -623,80 +578,29 @@ function processSidebarAvatars(): void {
 
   SIDEBAR_AVATAR_SELECTORS.forEach((selector) => {
     document.querySelectorAll<HTMLElement>(selector).forEach((element) => {
-      /*
-       * Only process sidebar rows.
-       */
-      if (!element.closest("#pane-side")) {
+      if (shouldIgnoreElement(element) || isInsideContactNameContainer(element)) {
         return;
       }
-
-      const wrapper = findSidebarAvatarWrapper(element);
-
-      if (wrapper) {
-        visualElements.push(wrapper);
-      }
+      visualElements.push(element);
     });
   });
 
   uniqueElements(visualElements).forEach((element) => {
-    if (shouldIgnoreElement(element)) {
-      return;
-    }
-
-    if (isInsideContactNameContainer(element)) {
-      return;
-    }
-
-    applyBlur(element, getBlurIntensity());
+    applyBlur(element);
   });
 }
 
 function findSidebarAvatarWrapper(visual: HTMLElement): HTMLElement | null {
-  const cell = visual.closest<HTMLElement>(
-    '[data-testid="cell-frame-container"]',
-  );
-
-  if (!cell) {
-    return null;
-  }
-
-  let current: HTMLElement | null = visual.parentElement;
-
-  let fallback: HTMLElement | null = null;
-
-  while (current && current !== cell) {
-    fallback = current;
-
-    const rect = current.getBoundingClientRect();
-
-    /*
-     * Avatar visual wrapper is normally around
-     * 48x48 pixels.
-     */
-    if (
-      rect.width >= 40 &&
-      rect.width <= 60 &&
-      rect.height >= 40 &&
-      rect.height <= 60
-    ) {
-      return current;
-    }
-
-    current = current.parentElement;
-  }
-
-  return fallback;
+  return visual.parentElement || visual;
 }
 
 function getProfilePictureElements(): HTMLElement[] {
   const elements: HTMLElement[] = [];
-
   PROFILE_PICTURE_SELECTORS.forEach((selector) => {
     document.querySelectorAll<HTMLElement>(selector).forEach((element) => {
       elements.push(element);
     });
   });
-
   return uniqueElements(elements);
 }
 
@@ -704,7 +608,6 @@ function cleanupSidebarAvatars(): void {
   SIDEBAR_AVATAR_SELECTORS.forEach((selector) => {
     document.querySelectorAll<HTMLElement>(selector).forEach((element) => {
       const wrapper = findSidebarAvatarWrapper(element);
-
       if (wrapper) {
         removeBlurDeep(wrapper);
       }
@@ -718,37 +621,27 @@ function cleanupSidebarAvatars(): void {
 
 function processMedia(): void {
   const elements = getMediaElements();
-
   elements.forEach((element) => {
-    if (shouldIgnoreElement(element)) {
+    if (
+      shouldIgnoreElement(element) ||
+      isInsideMessageMeta(element) ||
+      isMessageStatusElement(element) ||
+      isInsideContactNameContainer(element)
+    ) {
       return;
     }
 
-    if (isInsideMessageMeta(element)) {
-      return;
-    }
-
-    if (isMessageStatusElement(element)) {
-      return;
-    }
-
-    if (isInsideContactNameContainer(element)) {
-      return;
-    }
-
-    applyBlur(element, getBlurIntensity());
+    applyBlur(element);
   });
 }
 
 function getMediaElements(): HTMLElement[] {
   const elements: HTMLElement[] = [];
-
   MEDIA_SELECTORS.forEach((selector) => {
     document.querySelectorAll<HTMLElement>(selector).forEach((element) => {
       elements.push(element);
     });
   });
-
   return uniqueElements(elements);
 }
 
@@ -758,87 +651,72 @@ function getMediaElements(): HTMLElement[] {
 
 function processFiles(): void {
   const elements = getFileElements();
-
   elements.forEach((element) => {
-    if (shouldIgnoreElement(element)) {
+    if (
+      shouldIgnoreElement(element) ||
+      isInsideMessageMeta(element) ||
+      isMessageStatusElement(element)
+    ) {
       return;
     }
 
-    if (isInsideMessageMeta(element)) {
-      return;
-    }
-
-    if (isMessageStatusElement(element)) {
-      return;
-    }
-
-    applyBlur(element, getBlurIntensity());
+    applyBlur(element);
   });
 }
 
 function getFileElements(): HTMLElement[] {
   const elements: HTMLElement[] = [];
-
   FILE_SELECTORS.forEach((selector) => {
     document.querySelectorAll<HTMLElement>(selector).forEach((element) => {
       elements.push(element);
     });
   });
+  return uniqueElements(elements);
+}
 
+/* =========================================================
+ * COMPOSE BOX
+ * ========================================================= */
+
+function processComposeBox(): void {
+  const elements = getComposeBoxElements();
+  elements.forEach((element) => {
+    if (shouldIgnoreElement(element)) {
+      return;
+    }
+    applyBlur(element);
+  });
+}
+
+function getComposeBoxElements(): HTMLElement[] {
+  const elements: HTMLElement[] = [];
+  COMPOSE_BOX_SELECTORS.forEach((selector) => {
+    document.querySelectorAll<HTMLElement>(selector).forEach((element) => {
+      elements.push(element);
+    });
+  });
   return uniqueElements(elements);
 }
 
 /* =========================================================
  * PROTECTED METADATA
  * ========================================================= */
+
 function cleanupProtectedMetadata(): void {
-  /*
-   * =======================================================
-   * MESSAGE META
-   * =======================================================
-   */
   MESSAGE_META_SELECTORS.forEach((selector) => {
     document.querySelectorAll<HTMLElement>(selector).forEach((element) => {
       removeBlurDeep(element);
     });
   });
 
-  /*
-   * =======================================================
-   * MESSAGE / PREVIEW STATUS ICONS
-   * =======================================================
-   *
-   * Detect via SVG <title>.
-   *
-   * IMPORTANT:
-   *
-   * We only remove blur from the status icon's
-   * own local wrapper.
-   *
-   * We do NOT walk 10 levels upward anymore.
-   *
-   * This prevents accidentally unblurring an entire
-   * message bubble.
-   */
   document.querySelectorAll<SVGElement>("svg title").forEach((svg) => {
     const title = svg.querySelector("title");
-
-    if (!title) {
+    if (!title || !isWhatsAppStatusTitle(title.textContent ?? "")) {
       return;
     }
-
-    if (!isWhatsAppStatusTitle(title.textContent ?? "")) {
-      return;
-    }
-
     protectStatusSvg(svg);
   });
 
-  /*
-   * =======================================================
-   * EXPLICIT STATUS ATTRIBUTES
-   * =======================================================
-   */
   const explicitStatusSelectors = [
     '[aria-label*="Dibaca" i]',
     '[aria-label*="Read" i]',
@@ -855,79 +733,46 @@ function cleanupProtectedMetadata(): void {
     });
   });
 
-  /*
-   * =======================================================
-   * SIDEBAR TIME
-   * =======================================================
-   */
   document
     .querySelectorAll<HTMLElement>('[data-testid="cell-frame-primary-detail"]')
     .forEach((element) => {
       removeBlurDeep(element);
     });
 }
+
 function protectStatusSvg(svg: SVGElement): void {
-  /*
-   * Find nearest known status root.
-   */
   const statusRoot = svg.closest<HTMLElement>(
     ['[data-testid="msg-meta"]', '[data-testid="last-msg-status"]'].join(","),
   );
 
   if (!statusRoot) {
-    /*
-     * If no known root exists, only remove blur
-     * from the SVG itself and its immediate parent.
-     */
     if (svg instanceof HTMLElement) {
       removeBlur(svg);
     }
-
-    if (svg.parentElement?.classList.contains(NTTBELL_BLUR_CLASS)) {
+    if (svg.parentElement?.classList.contains(WHATSAPP_BLUR_CLASS)) {
       removeBlur(svg.parentElement);
     }
-
     return;
   }
 
   let current: HTMLElement | null = svg.parentElement;
-
   let depth = 0;
 
   while (current && depth < 4) {
-    /*
-     * Never remove blur from actual message text.
-     */
-    if (current.matches('[data-testid="selectable-text"]')) {
+    if (
+      current.matches('[data-testid="selectable-text"]') ||
+      current.matches('[data-testid="message-text"]')
+    ) {
       break;
     }
 
-    if (current.matches('[data-testid="message-text"]')) {
-      break;
-    }
-
-    /*
-     * Stop at the status root.
-     */
     if (current === statusRoot) {
-      /*
-       * The status root itself should remain sharp
-       * only if it was blurred accidentally.
-       *
-       * Normally it is NOT a blur target.
-       */
       removeBlur(current);
-
       break;
     }
 
-    /*
-     * Remove only blur from status icon wrappers.
-     */
     removeBlur(current);
-
     current = current.parentElement;
-
     depth += 1;
   }
 }
@@ -937,70 +782,34 @@ function isInsideMessageMeta(element: Element): boolean {
 }
 
 function isMessageStatusElement(element: Element): boolean {
-  /*
-   * Status by SVG title.
-   */
   if (containsWhatsAppStatus(element)) {
     return true;
   }
-
-  /*
-   * Status by aria-label.
-   */
   const ariaLabel = element.getAttribute("aria-label") ?? "";
-
-  if (/dibaca|read|terkirim|delivered|sent/i.test(ariaLabel)) {
-    return true;
-  }
-
-  return false;
-}
-
-function containsProtectedMessageMetadata(element: Element): boolean {
-  if (element.querySelector(MESSAGE_META_SELECTORS.join(","))) {
-    return true;
-  }
-
-  if (containsWhatsAppStatus(element)) {
-    return true;
-  }
-
-  return false;
+  return /dibaca|read|terkirim|delivered|sent/i.test(ariaLabel);
 }
 
 function containsWhatsAppStatus(element: Element): boolean {
   const titles = element.querySelectorAll("svg title");
-
   for (const title of Array.from(titles)) {
     if (isWhatsAppStatusTitle(title.textContent ?? "")) {
       return true;
     }
   }
-
   return false;
 }
 
 function isWhatsAppStatusTitle(title: string): boolean {
   const normalized = title.trim().toLowerCase();
-
   return STATUS_TITLE_KEYWORDS.some((keyword) => normalized.includes(keyword));
 }
+
 function protectStatusInside(container: HTMLElement): void {
   container.querySelectorAll<SVGElement>("svg title").forEach((svg) => {
     const title = svg.querySelector("title");
-
-    if (!title) {
+    if (!title || !isWhatsAppStatusTitle(title.textContent ?? "")) {
       return;
     }
-
-    if (!isWhatsAppStatusTitle(title.textContent ?? "")) {
-      return;
-    }
-
-    /*
-     * Protect locally instead of walking through
-     * the whole chat bubble.
-     */
     protectStatusSvg(svg);
   });
 }
@@ -1016,16 +825,9 @@ function cleanupCategory(elements: HTMLElement[]): void {
 }
 
 function removeBlurDeep(element: HTMLElement): void {
-  /*
-   * Remove from root.
-   */
   removeBlur(element);
-
-  /*
-   * Remove from all Nttbell descendants.
-   */
   element
-    .querySelectorAll<HTMLElement>(`.${NTTBELL_BLUR_CLASS}`)
+    .querySelectorAll<HTMLElement>(`.${WHATSAPP_BLUR_CLASS}`)
     .forEach((child) => {
       removeBlur(child);
     });
@@ -1033,21 +835,9 @@ function removeBlurDeep(element: HTMLElement): void {
 
 function cleanupAllBlur(): void {
   document
-    .querySelectorAll<HTMLElement>(`.${NTTBELL_BLUR_CLASS}`)
+    .querySelectorAll<HTMLElement>(`.${WHATSAPP_BLUR_CLASS}`)
     .forEach((element) => {
       removeBlur(element);
-    });
-}
-
-function updateExistingBlurIntensity(intensity: number): void {
-  document
-    .querySelectorAll<HTMLElement>(`.${NTTBELL_BLUR_CLASS}`)
-    .forEach((element) => {
-      if (shouldIgnoreElement(element)) {
-        return;
-      }
-
-      updateElementBlurIntensity(element, intensity);
     });
 }
 
@@ -1056,34 +846,29 @@ function updateExistingBlurIntensity(intensity: number): void {
  * ========================================================= */
 
 function shouldIgnoreElement(element: Element): boolean {
-  /*
-   * Element itself.
-   */
   if (element.matches(IGNORE_SELECTORS.join(","))) {
     return true;
   }
-
-  /*
-   * Parent Nttbell UI.
-   */
   if (element.closest(IGNORE_SELECTORS.join(","))) {
     return true;
   }
-
   return false;
 }
+
 function hasVisibleTextOrContent(element: HTMLElement): boolean {
   if (element.textContent?.trim()) {
     return true;
   }
-
   if (element.querySelector("img, svg, picture, video, canvas")) {
     return true;
   }
-
   return false;
 }
+
 function isInsideContactNameContainer(element: Element): boolean {
+  if (element.tagName === "IMG" || element.tagName === "SVG") {
+    return false;
+  }
   return Boolean(
     element.closest(
       [
@@ -1094,53 +879,28 @@ function isInsideContactNameContainer(element: Element): boolean {
     ),
   );
 }
+
 function hasBlurredAncestor(element: Element): boolean {
   let parent = element.parentElement;
-
   while (parent) {
-    if (parent.classList.contains(NTTBELL_BLUR_CLASS)) {
+    if (parent.classList.contains(WHATSAPP_BLUR_CLASS)) {
       return true;
     }
-
     parent = parent.parentElement;
   }
-
   return false;
 }
+
 function isLikelyTimeElement(element: HTMLElement): boolean {
-  /*
-   * Exact sidebar timestamp container.
-   */
   if (element.matches('[data-testid="cell-frame-primary-detail"]')) {
     return true;
   }
-
-  /*
-   * Message metadata.
-   */
   if (isInsideMessageMeta(element)) {
     return true;
   }
-
-  /*
-   * Generic timestamp text.
-   */
   const text = element.textContent?.trim() ?? "";
-
-  if (/^\d{1,2}[.:]\d{2}$/.test(text)) {
-    return true;
-  }
-
-  return false;
+  return /^\d{1,2}[.:]\d{2}$/.test(text);
 }
-
-function getBlurIntensity(): number {
-  return privacySettings?.blurIntensity ?? 6;
-}
-
-/* =========================================================
- * UNIQUE ELEMENTS
- * ========================================================= */
 
 function uniqueElements(elements: HTMLElement[]): HTMLElement[] {
   return Array.from(new Set(elements));

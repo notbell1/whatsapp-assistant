@@ -1,12 +1,12 @@
-﻿import { startWhatsAppObserver } from "./whatsapp/observer";
+import { startWhatsAppObserver } from "./whatsapp/observer";
 import { startPrivacyEngine } from "./privacy/engine";
-import { initNttbellGlobalShortcuts } from "./ui/nttbell-view"; // Wajib di-import!
+import { initWhatsAppGlobalShortcuts } from "./ui/whatsapp-view";
 
 function initialize(): void {
-  console.log("[Nttbell] Content script loaded.");
+  console.log("[WhatsApp Assistant] Content script loaded v2.0.0");
   startWhatsAppObserver();
-  startPrivacyEngine();
-  initNttbellGlobalShortcuts();
+  void startPrivacyEngine();
+  initWhatsAppGlobalShortcuts();
 }
 
 if (document.readyState === "loading") {
